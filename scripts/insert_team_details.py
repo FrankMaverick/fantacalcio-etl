@@ -13,12 +13,12 @@ def insert_team_details(df_team_details):
     session = Session()
 
     try:
-        # Ottieni un dizionario di mapping nome del team -> ID del team dalla tabella teams
-        team_name_id_mapping = {team.team_name: team.id for team in session.query(Team).all()}
+        # Ottieni un dizionario di mapping footballapi_id -> ID del team dalla tabella teams
+        team_footapi_id_mapping = {team.footballapi_id: team.id for team in session.query(Team).all()}
         
         for _, row in df_team_details.iterrows():
             # Ottieni l'ID del team dal dizionario di mapping usando il nome del team dal DataFrame
-            team_id = team_name_id_mapping.get(row['team_name'])
+            team_id = team_footapi_id_mapping.get(row['team_id'])
 
             if team_id:
                 # Verifica se esiste già un record per questo team nei team_details
@@ -41,7 +41,7 @@ def insert_team_details(df_team_details):
                     )
                     session.add(team_details)
             else:
-                logger.error(f"Team '{row['team_name']}' not found in the database.")
+                logger.error(f"Team '{row['team_id']}' not found in the database.")
 
         session.commit()
         logger.info("Team details inserted successfully.")

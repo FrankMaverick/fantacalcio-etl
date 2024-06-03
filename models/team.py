@@ -14,6 +14,7 @@ class Team(Base):
     #team_national = Column(Boolean)
     team_logo_url = Column(String(255))
     current_in_serie_a = Column(Boolean)
+    footballapi_id = Column(Integer, unique=True)
 
     players = relationship("Player", back_populates="team")
     details = relationship("TeamDetails", back_populates="team")

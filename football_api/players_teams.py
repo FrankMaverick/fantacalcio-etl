@@ -8,11 +8,11 @@ def get_players_team_info(players_team_obj):
     for player in players_team_obj['players']:
         row = {
             'player_id': player['id'],
-            'player_name': player['name'],
+            #'player_name': player['name'],
             #'player_age': player['age'],
             'player_number': player['number'],
             'player_position': player['position'],
-            'player_photo': player['photo'],
+            #'player_photo': player['photo'],
             'team_id': team_id,
             'team_name': team_name,
             'team_logo': team_logo

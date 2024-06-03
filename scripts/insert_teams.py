@@ -28,6 +28,7 @@ def insert_teams(df_teams, historical_data=False):
         for _, row in df_teams.iterrows():
             team_data = {
                 'uid': generate_uuid(),
+                'footballapi_id': row['team_id'],
                 'team_name': row['team_name'],
                 'team_code': row['team_code'],
                 'team_country': row['team_country'],
@@ -37,7 +38,7 @@ def insert_teams(df_teams, historical_data=False):
                 'current_in_serie_a': True if not historical_data else None
             }
 
-            team = session.query(Team).filter_by(team_name=row['team_name']).first()
+            team = session.query(Team).filter_by(footballapi_id=row['team_id']).first()
             if team:
                 # Update existing team
                 team.current_in_serie_a = True if not historical_data else None

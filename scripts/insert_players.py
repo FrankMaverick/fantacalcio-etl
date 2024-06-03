@@ -3,55 +3,59 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.player import Player
-from models.player_details import PlayerDetails
+from models.team import Team  # Importa il modello Team
 from config import DB_PATH
+
+import logging
+logger = logging.getLogger(__name__)
 
 def generate_uuid():
     return str(uuid.uuid4())
 
-def insert_players(session, players_df):
-    for index, player in players_df.iterrows():
-        player_data = Player(
-            uid=generate_uuid(),
-            display_name=player['player_name'],
-            first_name=player['player_firstname'],
-            last_name=player['player_lastname']
-        )
-        session.add(player_data)
-    session.commit()
-
-def insert_player_details(session, players_details_df):
-    for index, player_details in players_details_df.iterrows():
-        display_name = player_details['display_name']
-        player = session.query(Player).filter_by(display_name=display_name).first()
-        
-        if player:
-            player_details_data = PlayerDetails(
-                uid=generate_uuid(),
-                player_id=player.id,
-                height=player_details['height'],
-                weight=player_details['weight'],
-                birth_date=player_details['birth_date'],
-                nationality=player_details['nationality'],
-                img_url=player_details['img_url']
-            )
-            session.add(player_details_data)
-        else:
-            print(f"Player with display_name {display_name} not found in players table.")
-    session.commit()
-
-def main():
+def insert_players(players_df, historical_data=False):
     engine = create_engine(DB_PATH)
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    players_df = pd.read_csv('data/players.csv')
-    players_details_df = pd.read_csv('data/player_details.csv')
+    try:
+        if not historical_data:
+            # Set serie_a_player to False and team_id to None for all existing players 
+            session.query(Player).update({Player.serie_a_player: False, Player.team_id: None})
+            session.commit()
 
-    insert_players(session, players_df)
-    insert_player_details(session, players_details_df)
+        for _, row in players_df.iterrows():
+            # Cerca l'ID del team utilizzando il team_id di football_api presente nel DataFrame e nella tabella Teams
+            team = session.query(Team).filter_by(footballapi_id=row['team_id']).first()
+            if team:
+                team_id = team.id
+            else:
+                logger.error(f"Team '{row['team_name']}' not found in the database.")
+                continue
+            
+            player_data = {
+                'uid': generate_uuid(),
+                'display_name': row['player_name'],
+                'first_name': row['player_firstname'],
+                'last_name': row['player_lastname'],
+                'team_id': team_id,
+                'role_id': None,  # Null at the moment
+                'serie_a_player': True if not historical_data else None,
+                'footballapi_id': row['player_id']
+            }
 
-    session.close()
+            player = session.query(Player).filter_by(footballapi_id=row['player_id']).first()
+            if player:
+                # Update existing player
+                player.serie_a_player = True if not historical_data else None
+                player.team_id = team_id
+            else:
+                # Insert new player
+                new_player = Player(**player_data)
+                session.add(new_player)
 
-if __name__ == "__main__":
-    main()
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Error: {e}")
+    finally:
+        session.close()

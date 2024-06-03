@@ -4,6 +4,7 @@ from football_api.teams import teams_to_dataframe
 from scripts.create_tables import create_tables
 from football_api.call_api import fetch_players_data, fetch_players_teams_data, fetch_teams_data
 from scripts.drop_tables import drop_tables
+from scripts.insert_player_details import insert_player_details
 from scripts.insert_players import insert_players
 from scripts.insert_team_details import insert_team_details
 from scripts.insert_teams import insert_teams
@@ -78,3 +79,4 @@ if __name__ == "__main__":
 
     # next step
     insert_players(players_df, HISTORICAL_DATA)
+    insert_player_details(players_df)

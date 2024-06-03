@@ -6,7 +6,7 @@ class PlayerDetails(Base):
     __tablename__ = 'player_details'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    uid = Column(String, unique=True, nullable=False)
+    #uid = Column(String, unique=True, nullable=False)
     player_id = Column(Integer, ForeignKey('players.id'), unique=True)
     height = Column(Float)
     weight = Column(Float)

@@ -18,3 +18,4 @@ class Team(Base):
 
     players = relationship("Player", back_populates="team")
     details = relationship("TeamDetails", back_populates="team")
+    team_name_mappings = relationship("TeamNameMapping", back_populates="team")

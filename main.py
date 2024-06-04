@@ -1,3 +1,11 @@
+from config import FOOTAPI_LEAGUE, FOOTAPI_SEASON, FBR_LEAGUE, FBR_SEASON, PLAYERS_FILE_JSON, TEAMS_FILE_JSON, PLAYERS_TEAMS_FILE_JSON, HISTORICAL_DATA, FBR_SOURCE_NAME
+import logging
+import pandas as pd 
+from load.insert_sources import insert_source
+from load.insert_team_name_mappings import insert_team_name_mappings
+from logging_config import setup_logging
+from pathlib import Path
+from extract.fbr.team_season_stats import get_team_season_stats
 from extract.football_api.players import players_to_dataframe
 from extract.football_api.players_teams import players_teams_to_dataframe
 from extract.football_api.teams import teams_to_dataframe
@@ -10,10 +18,6 @@ from load.insert_roles import insert_roles
 from load.insert_team_details import insert_team_details
 from load.insert_teams import insert_teams
 from utils import file_operations as file_ops
-from config import LEAGUE, SEASON, PLAYERS_FILE_JSON, TEAMS_FILE_JSON, PLAYERS_TEAMS_FILE_JSON, HISTORICAL_DATA
-import logging
-from logging_config import setup_logging
-from pathlib import Path
 
 # Imposta il logging
 setup_logging()
@@ -29,12 +33,12 @@ if __name__ == "__main__":
     
     # Extract players
     if not Path(PLAYERS_FILE_JSON).is_file():
-        logger.info(f"Extracting players for {SEASON} season")
-        players_list = fetch_players_data(league=LEAGUE, season=SEASON)
+        logger.info(f"Extracting players for {FOOTAPI_SEASON} season")
+        players_list = fetch_players_data(league=FOOTAPI_LEAGUE, season=FOOTAPI_SEASON)
         # Save players to json
         file_ops.save_json(players_list, PLAYERS_FILE_JSON)
     else:
-       logger.info(f"Players for {SEASON} season already extracted") 
+       logger.info(f"Players for {FOOTAPI_SEASON} season already extracted") 
        players_list = file_ops.read_json(PLAYERS_FILE_JSON)
     
     players_df = players_to_dataframe(players_list)
@@ -42,12 +46,12 @@ if __name__ == "__main__":
     
     # Extract Teams
     if not Path(TEAMS_FILE_JSON).is_file():
-        logger.info(f"Extracting teams for {SEASON} season")
-        teams_list = fetch_teams_data(league=LEAGUE, season=SEASON)
+        logger.info(f"Extracting teams for {FOOTAPI_SEASON} season")
+        teams_list = fetch_teams_data(league=FOOTAPI_LEAGUE, season=FOOTAPI_SEASON)
         # Save teams to json
         file_ops.save_json(teams_list, TEAMS_FILE_JSON)
     else:
-        logger.info(f"Teams for {SEASON} season already extracted") 
+        logger.info(f"Teams for {FOOTAPI_SEASON} season already extracted") 
         teams_list = file_ops.read_json(TEAMS_FILE_JSON)
     
     teams_df = teams_to_dataframe(teams_list)
@@ -56,12 +60,12 @@ if __name__ == "__main__":
     # Extract Players for every Teams (not possible for historical data)
     if not HISTORICAL_DATA:
         if not Path(PLAYERS_TEAMS_FILE_JSON).is_file():
-            logger.info(f"Extracting players of teams for {SEASON} season")
+            logger.info(f"Extracting players of teams for {FOOTAPI_SEASON} season")
             players_teams_list = fetch_players_teams_data(teams_list)
             # Save teams to json
             file_ops.save_json(players_teams_list, PLAYERS_TEAMS_FILE_JSON)
         else:
-            logger.info(f"Players of teams for {SEASON} season already extracted") 
+            logger.info(f"Players of teams for {FOOTAPI_SEASON} season already extracted") 
             players_teams_list = file_ops.read_json(PLAYERS_TEAMS_FILE_JSON)
     
         players_teams_df = players_teams_to_dataframe(players_teams_list)
@@ -70,13 +74,26 @@ if __name__ == "__main__":
 
         #players_df.to_csv('data/players_teams_df.csv')
 
+    #forse qui non cambia niente se sono dati storici o meno ?
+    # team_season_stats_df  = get_team_season_stats(FBR_LEAGUE, FBR_SEASON)
+    # team_season_stats_df.reset_index(inplace=True)
+    # team_season_stats_df.to_csv('data/team_season_stats_df.csv')
+    team_season_stats_df = pd.read_csv('data/team_season_stats_df.csv')
+    fbr_team = team_season_stats_df[['team']].dropna(axis='rows').copy()
 
     # Insert data
     # teams
     insert_teams(teams_df, HISTORICAL_DATA)
     insert_team_details(teams_df)
 
-    # next step
+    # # players
     insert_players(players_df, HISTORICAL_DATA)
     insert_player_details(players_df)
+
+    # # roles
     insert_roles(players_df)
+
+    ## FBREF DATA
+    insert_source(FBR_SOURCE_NAME)
+    # Team mappings from FBRef
+    insert_team_name_mappings(fbr_team[['team']], FBR_SOURCE_NAME)

@@ -43,7 +43,6 @@ def insert_player_details(player_details_df):
                     nationality=row['player_birth_country'],
                     img_url=row['player_photo']
                 )
-                print(player_details.player_id, player_details.height, player_details.weight, player_details.birth_date, player_details.nationality, player_details.img_url)
                 session.add(player_details)
             else:
                 logger.error(f"Player with footballapi_id '{row['player_id']}' not found in the database.")

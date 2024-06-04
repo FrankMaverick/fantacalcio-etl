@@ -16,11 +16,12 @@ The main objective of Fantacalcio ETL is to gather updated and comprehensive dat
 
 The project is structured as follows:
 
-- `scripts/`: Contains Python scripts for data extraction, transformation, and loading.
+- `extract/`: Contains Python scripts for data extraction and small transformation
+- `load/`: Contains Python scripts for data loading.
 - `models/`: Contains SQLAlchemy class definitions for database modeling.
+- `utils/`: Contains contains useful functions
 - `config.py`: Configuration file for the project, including parameters such as the database path and API keys.
 - `main.py`: Main file for running scripts and ETL operations.
-- `README.md`: This file, which provides an overview of the project, its features, and its structure.
 
 ## Usage
 

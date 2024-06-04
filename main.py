@@ -1,13 +1,14 @@
-from football_api.players import players_to_dataframe
-from football_api.players_teams import players_teams_to_dataframe
-from football_api.teams import teams_to_dataframe
-from scripts.create_tables import create_tables
-from football_api.call_api import fetch_players_data, fetch_players_teams_data, fetch_teams_data
-from scripts.drop_tables import drop_tables
-from scripts.insert_player_details import insert_player_details
-from scripts.insert_players import insert_players
-from scripts.insert_team_details import insert_team_details
-from scripts.insert_teams import insert_teams
+from extract.football_api.players import players_to_dataframe
+from extract.football_api.players_teams import players_teams_to_dataframe
+from extract.football_api.teams import teams_to_dataframe
+from extract.football_api.call_api import fetch_players_data, fetch_players_teams_data, fetch_teams_data
+from load.create_tables import create_tables
+from load.drop_tables import drop_tables
+from load.insert_player_details import insert_player_details
+from load.insert_players import insert_players
+from load.insert_roles import insert_roles
+from load.insert_team_details import insert_team_details
+from load.insert_teams import insert_teams
 from utils import file_operations as file_ops
 from config import LEAGUE, SEASON, PLAYERS_FILE_JSON, TEAMS_FILE_JSON, PLAYERS_TEAMS_FILE_JSON, HISTORICAL_DATA
 import logging
@@ -65,8 +66,6 @@ if __name__ == "__main__":
     
         players_teams_df = players_teams_to_dataframe(players_teams_list)
 
-        #players_teams_df.to_csv('data/players_teams_df.csv')
-
         players_df = players_teams_df.merge(players_df, on='player_id', how='left')
 
         #players_df.to_csv('data/players_teams_df.csv')
@@ -80,3 +79,4 @@ if __name__ == "__main__":
     # next step
     insert_players(players_df, HISTORICAL_DATA)
     insert_player_details(players_df)
+    insert_roles(players_df)

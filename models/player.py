@@ -17,5 +17,6 @@ class Player(Base):
     
     team = relationship("Team", back_populates="players")
     role = relationship("Role", back_populates="players")
-
-    player_detail = relationship("PlayerDetails", back_populates="player") 
+    player_detail = relationship("PlayerDetails", back_populates="player")
+    player_name_mappings = relationship("PlayerNameMapping", back_populates="player")
+    

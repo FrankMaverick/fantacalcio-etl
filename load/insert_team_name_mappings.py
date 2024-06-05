@@ -46,13 +46,19 @@ def insert_team_name_mappings(team_names_df, source_name):
                     new_mapping = TeamNameMapping(
                         team_id=team.id,                        
                         source_id=source_id,
-                        team_name=best_match
+                        team_name=row['team']
                     )
                     session.add(new_mapping)
                 else:
                     logger.warning(f"No team found for '{best_match}' in the teams table.")
             else:
                 logger.warning(f"No suitable match found for '{row['team']}' in the teams table.")
+                new_mapping = TeamNameMapping(
+                    team_id=None,
+                    source_id=source_id,
+                    team_name=row['team']
+                )
+                session.add(new_mapping)                
         
         session.commit()
     except Exception as e:

@@ -21,7 +21,8 @@ LOGGING_CONFIG = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'formatter': 'standard',
-            'filename': os.path.join(os.path.dirname(__file__), 'log/etl.log')
+            'filename': os.path.join(os.path.dirname(__file__), 'log/etl.log'),
+            'encoding': 'utf-8'
         },
     },
     'loggers': {

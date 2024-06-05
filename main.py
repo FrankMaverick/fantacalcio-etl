@@ -1,11 +1,13 @@
 from config import FOOTAPI_LEAGUE, FOOTAPI_SEASON, FBR_LEAGUE, FBR_SEASON, PLAYERS_FILE_JSON, TEAMS_FILE_JSON, PLAYERS_TEAMS_FILE_JSON, HISTORICAL_DATA, FBR_SOURCE_NAME
 import logging
 import pandas as pd 
+from load.insert_player_name_mappings import insert_player_name_mappings
 from load.insert_sources import insert_source
 from load.insert_team_name_mappings import insert_team_name_mappings
 from logging_config import setup_logging
 from pathlib import Path
 from extract.fbr.team_season_stats import get_team_season_stats
+from extract.fbr.player_season_stats import get_player_season_stats
 from extract.football_api.players import players_to_dataframe
 from extract.football_api.players_teams import players_teams_to_dataframe
 from extract.football_api.teams import teams_to_dataframe
@@ -79,7 +81,14 @@ if __name__ == "__main__":
     # team_season_stats_df.reset_index(inplace=True)
     # team_season_stats_df.to_csv('data/team_season_stats_df.csv')
     team_season_stats_df = pd.read_csv('data/team_season_stats_df.csv')
-    fbr_team = team_season_stats_df[['team']].dropna(axis='rows').copy()
+    fbr_teams = team_season_stats_df[['team']].dropna(axis='rows').copy()
+
+    #forse qui non cambia niente se sono dati storici o meno ?
+    player_season_stats_df  = get_player_season_stats(FBR_LEAGUE, FBR_SEASON)
+    player_season_stats_df.reset_index(inplace=True)
+    player_season_stats_df.to_csv('data/player_season_stats_df.csv', encoding="utf-8")
+    player_season_stats_df = pd.read_csv('data/player_season_stats_df.csv')
+    fbr_players_teams = player_season_stats_df[['team','player']].dropna(axis='rows').copy()    
 
     # Insert data
     # teams
@@ -96,4 +105,5 @@ if __name__ == "__main__":
     ## FBREF DATA
     insert_source(FBR_SOURCE_NAME)
     # Team mappings from FBRef
-    insert_team_name_mappings(fbr_team[['team']], FBR_SOURCE_NAME)
+    insert_team_name_mappings(fbr_teams[['team']], FBR_SOURCE_NAME)
+    insert_player_name_mappings(fbr_players_teams[['team','player']], FBR_SOURCE_NAME)

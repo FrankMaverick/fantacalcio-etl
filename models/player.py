@@ -12,7 +12,7 @@ class Player(Base):
     last_name = Column(String(255))
     team_id = Column(Integer, ForeignKey('teams.id'))
     role_id = Column(Integer, ForeignKey('roles.id'))
-    serie_a_player = Column(Boolean)
+    current_in_serie_a = Column(Boolean)
     footballapi_id = Column(Integer, unique=True)
     
     team = relationship("Team", back_populates="players")

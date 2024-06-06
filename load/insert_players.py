@@ -19,8 +19,8 @@ def insert_players(players_df, historical_data=False):
 
     try:
         if not historical_data:
-            # Set serie_a_player to False and team_id to None for all existing players 
-            session.query(Player).update({Player.serie_a_player: False, Player.team_id: None})
+            # Set current_in_serie_a to False and team_id to None for all existing players 
+            session.query(Player).update({Player.current_in_serie_a: False, Player.team_id: None})
             session.commit()
 
         for _, row in players_df.iterrows():
@@ -39,14 +39,14 @@ def insert_players(players_df, historical_data=False):
                 'last_name': row['player_lastname'],
                 'team_id': team_id,
                 'role_id': None,  # Null at the moment
-                'serie_a_player': True if not historical_data else None,
+                'current_in_serie_a': True if not historical_data else None,
                 'footballapi_id': row['player_id']
             }
 
             player = session.query(Player).filter_by(footballapi_id=row['player_id']).first()
             if player:
                 # Update existing player
-                player.serie_a_player = True if not historical_data else None
+                player.current_in_serie_a = True if not historical_data else None
                 player.team_id = team_id
             else:
                 # Insert new player

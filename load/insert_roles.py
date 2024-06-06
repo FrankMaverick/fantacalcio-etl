@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def translate_role(role):
-    role = role.lower()  # Converte il testo a minuscolo per evitare problemi di capitalizzazione
+    role = role.lower()
     if role == "goalkeeper":
         return "Portiere"
     elif role == "defender":
@@ -20,7 +20,6 @@ def translate_role(role):
         return "Attaccante"
     else:
         return None
-
 
 def insert_roles(player_details_df):
     engine = create_engine(DB_PATH)
@@ -33,17 +32,26 @@ def insert_roles(player_details_df):
             player = session.query(Player).filter_by(footballapi_id=row['player_id']).first()
             
             if player:
-                role = Role(
-                    role_principal = translate_role(row['player_position']),
-                    role_specific=None,
-                    role_abbreviation=None
-                )
-                session.add(role)
+                role_principal = translate_role(row['player_position'])
+                
+                # Controlla se il ruolo esiste già
+                role = session.query(Role).filter_by(role_principal=role_principal).first()
+                if not role:
+                    role = Role(
+                        role_principal=role_principal,
+                        role_specific=None,
+                        role_abbreviation=None
+                    )
+                    session.add(role)
+                    session.commit()  # Commit per ottenere l'id del ruolo
+                
+                # Aggiorna il role_id del giocatore
+                player.role_id = role.id
+                session.commit()
             else:
                 logger.error(f"Player with footballapi_id '{row['player_id']}' not found in the database.")
         
-        session.commit()
-        logger.info("Player roles inserted successfully.")
+        logger.info("Player roles inserted and updated successfully.")
     except Exception as e:
         session.rollback()
         logger.error(f"Error: {e}")

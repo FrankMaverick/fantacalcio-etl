@@ -7,8 +7,12 @@ class Role(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     #uid = Column(String, unique=True, nullable=False)
-    role_principal = Column(String(50))
-    role_specific = Column(String(50))
-    role_abbreviation = Column(String(10))
+    role_principal = Column(String, nullable=False, unique=True)
+    role_specific = Column(String, nullable=True, unique=True)
+    role_abbreviation = Column(String, nullable=True, unique=True)
     
     players = relationship("Player", back_populates="role") 
+
+
+
+    

@@ -40,7 +40,7 @@ def insert_team_name_mappings(team_names_df, source_name):
             
             # Cerca il miglior match fuzzywuzzy tra tutti i nomi dei team esistenti
             best_match, score = fuzzy_match_name(row['team'], all_team_names)
-            if score >= 90:
+            if score >= 85:
                 team = session.query(Team).filter_by(team_name=best_match).first()
                 if team:
                     new_mapping = TeamNameMapping(

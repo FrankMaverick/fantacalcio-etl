@@ -1,10 +1,5 @@
 from sqlalchemy import create_engine
 from models.base import Base
-from models.team import Team
-from models.player import Player
-from models.player_details import PlayerDetails
-from models.role import Role
-from models.team_details import TeamDetails
 from sqlalchemy.exc import SQLAlchemyError
 from config import DB_PATH
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from models.base import Base
 
@@ -12,3 +12,5 @@ class PlayerNameMapping(Base):
     
     player = relationship("Player", back_populates="player_name_mappings")
     source = relationship("Source", back_populates="player_name_mapping")
+
+    __table_args__ = (UniqueConstraint('source_id', 'player_name', name='_source_player_name_uc'),)

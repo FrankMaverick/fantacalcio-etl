@@ -19,15 +19,17 @@ def get_source_id(session, source_name):
         logger.error(f"No source found for '{source_name}'")
         return None
 
-def get_full_display_name(display_name, first_name):
+def get_full_name(display_name, first_name):
     """
-    Sostituisce l'iniziale puntata nel display_name con il first_name completo, se corrisponde.
+    Sostituisce l'iniziale puntata nel display_name con il first_name, se corrisponde.
+    Altrimenti il primo first_name. Se non c'è il punto, tutto il display_name
     """
     if '. ' in display_name:
         initial, last_name = display_name.split('. ', 1)
         for name in first_name.split():
             if name.startswith(initial):
                 return f"{name} {last_name}"
+        return f"{first_name.split()[0]} {last_name}"
     return display_name
 
 def insert_player_name_mappings(player_names_df, source_name):
@@ -41,12 +43,14 @@ def insert_player_name_mappings(player_names_df, source_name):
             logger.warning(f"Source name {source_name} not configured")
             return
         
+        #TODO: ci sono giocatori che hanno 2 team nel df, giocatori che sono passati da un team all'altro durante la stagione (es. Zapata)
         for _, row in player_names_df.iterrows():
             player_name = row['player']
             team_name = row['team']
 
             # Verifica se il nome del giocatore è già presente nella tabella di mapping
             existing_mapping = session.query(PlayerNameMapping).filter_by(player_name=player_name, source_id=source_id).first()
+
             if existing_mapping:
                 logger.warning(f"Player '{player_name}' already exists in the player_name_mappings table for source '{source_name}'.")
                 continue
@@ -61,31 +65,40 @@ def insert_player_name_mappings(player_names_df, source_name):
 
             # Ottieni tutti i giocatori del team specificato
             players = session.query(Player).filter_by(team_id=team_id).all()
-            all_player_names = [get_full_display_name(player.display_name, player.first_name) for player in players]
+            all_player_names = [get_full_name(player.display_name, player.first_name) for player in players]
 
             # Cerca il miglior match fuzzywuzzy tra i nomi dei giocatori del team specificato
             best_match, score = fuzzy_match_name(player_name, all_player_names)
             logger.debug(f"Best match for '{player_name}' is '{best_match}' with score {score}")
 
             if score >= 85:
-                matched_player = next((p for p in players if get_full_display_name(p.display_name, p.first_name) == best_match), None)
+                matched_player = next((p for p in players if get_full_name(p.display_name, p.first_name) == best_match), None)
                 if matched_player:
+                    if existing_mapping:
+                        # Update existing mapping
+                        existing_mapping.player_id = matched_player.id
+                    else:
+                        # Add new mapping
+                        new_mapping = PlayerNameMapping(
+                            player_id=matched_player.id,
+                            source_id=source_id,
+                            player_name=player_name
+                        )
+                        session.add(new_mapping)
+                else:
+                    logger.warning(f"No player found for '{best_match}' in the players table.")
+            else:
+                if existing_mapping:
+                    # Update existing mapping
+                    existing_mapping.player_id = None
+                else:
+                    # Add new mapping without player_id
                     new_mapping = PlayerNameMapping(
-                        player_id=matched_player.id,
+                        player_id=None,
                         source_id=source_id,
                         player_name=player_name
                     )
                     session.add(new_mapping)
-                else:
-                    logger.warning(f"No player found for '{best_match}' in the players table.")
-            else:
-                logger.warning(f"No suitable match found for '{player_name}' in the players table. Adding without player_id.")
-                new_mapping = PlayerNameMapping(
-                    player_id=None,
-                    source_id=source_id,
-                    player_name=player_name
-                )
-                session.add(new_mapping)
 
         session.commit()
     except Exception as e:

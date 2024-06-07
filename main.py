@@ -4,6 +4,7 @@ import pandas as pd
 from load.insert_player_name_mappings import insert_player_name_mappings
 from load.insert_sources import insert_source
 from load.insert_team_name_mappings import insert_team_name_mappings
+from load.truncate_tables import truncate_tables
 from logging_config import setup_logging
 from pathlib import Path
 from extract.fbr.team_season_stats import get_team_season_stats
@@ -30,8 +31,8 @@ if __name__ == "__main__":
     logger.info("Start")
 
     # Create tables
-    drop_tables()
-    create_tables()
+    #drop_tables()
+    #create_tables()
     
     # Extract players
     if not Path(PLAYERS_FILE_JSON).is_file():
@@ -84,9 +85,9 @@ if __name__ == "__main__":
     fbr_teams = team_season_stats_df[['team']].dropna(axis='rows').copy()
 
     #forse qui non cambia niente se sono dati storici o meno ?
-    player_season_stats_df  = get_player_season_stats(FBR_LEAGUE, FBR_SEASON)
-    player_season_stats_df.reset_index(inplace=True)
-    player_season_stats_df.to_csv('data/player_season_stats_df.csv', encoding="utf-8")
+    #player_season_stats_df  = get_player_season_stats(FBR_LEAGUE, FBR_SEASON)
+    #player_season_stats_df.reset_index(inplace=True)
+    #player_season_stats_df.to_csv('data/player_season_stats_df.csv', encoding="utf-8")
     player_season_stats_df = pd.read_csv('data/player_season_stats_df.csv')
     fbr_players_teams = player_season_stats_df[['team','player']].dropna(axis='rows').copy()    
 

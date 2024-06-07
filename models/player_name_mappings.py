@@ -6,9 +6,10 @@ class PlayerNameMapping(Base):
     __tablename__ = 'player_name_mappings'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
+    uid = Column(String, unique=True, nullable=False)
     player_id = Column(Integer, ForeignKey('players.id'))
     source_id = Column(Integer, ForeignKey('sources.id'))
-    player_name = Column(String(255))
+    player_name = Column(String(100))
     
     player = relationship("Player", back_populates="player_name_mappings")
     source = relationship("Source", back_populates="player_name_mapping")

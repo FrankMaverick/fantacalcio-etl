@@ -7,9 +7,9 @@ class Player(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     uid = Column(String, unique=True, nullable=False)
-    display_name = Column(String(255), nullable=False)
-    first_name = Column(String(255))
-    last_name = Column(String(255))
+    display_name = Column(String(100), nullable=False)
+    first_name = Column(String(100))
+    last_name = Column(String(100))
     team_id = Column(Integer, ForeignKey('teams.id'))
     role_id = Column(Integer, ForeignKey('roles.id'))
     current_in_serie_a = Column(Boolean)

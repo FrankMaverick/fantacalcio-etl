@@ -6,6 +6,7 @@ class TeamNameMapping(Base):
     __tablename__ = 'team_name_mappings'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
+    uid = Column(String, unique=True, nullable=False)
     team_id = Column(Integer, ForeignKey('teams.id'))
     source_id = Column(Integer, ForeignKey('sources.id'))
     team_name = Column(String(255))

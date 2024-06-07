@@ -31,8 +31,8 @@ if __name__ == "__main__":
     logger.info("Start")
 
     # Create tables
-    #drop_tables()
-    #create_tables()
+    drop_tables()
+    create_tables()
     
     # Extract players
     if not Path(PLAYERS_FILE_JSON).is_file():

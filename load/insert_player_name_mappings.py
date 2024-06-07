@@ -7,6 +7,7 @@ from models.player_name_mappings import PlayerNameMapping
 from models.team_name_mappings import TeamNameMapping
 from utils.fuzzywuzzy_utils import fuzzy_match_name
 from config import DB_PATH
+from utils.helpers import generate_uid
 
 import logging
 logger = logging.getLogger(__name__)
@@ -80,6 +81,7 @@ def insert_player_name_mappings(player_names_df, source_name):
                     else:
                         # Add new mapping
                         new_mapping = PlayerNameMapping(
+                            uid=generate_uid(),
                             player_id=matched_player.id,
                             source_id=source_id,
                             player_name=player_name
@@ -94,6 +96,7 @@ def insert_player_name_mappings(player_names_df, source_name):
                 else:
                     # Add new mapping without player_id
                     new_mapping = PlayerNameMapping(
+                        uid=generate_uid(),
                         player_id=None,
                         source_id=source_id,
                         player_name=player_name

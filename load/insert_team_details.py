@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from models.team import Team
 from models.team_details import TeamDetails
 from config import DB_PATH
+from utils.helpers import generate_uid
 
 import logging
 logger = logging.getLogger(__name__)
@@ -29,15 +30,16 @@ def insert_team_details(df_team_details):
                     existing_team_details.stadium_name = row['venue_name']
                     existing_team_details.stadium_city = row['venue_city']
                     existing_team_details.stadium_capacity = row['venue_capacity']
-                    existing_team_details.stadium_image_url = row['venue_image']
+                    existing_team_details.stadium_img_url = row['venue_image']
                 else:
                     # Inserisci nuovi dettagli del team
                     team_details = TeamDetails(
+                        uid=generate_uid(),
                         team_id=team_id,
                         stadium_name=row['venue_name'],
                         stadium_city=row['venue_city'],
                         stadium_capacity=row['venue_capacity'],
-                        stadium_image_url=row['venue_image']
+                        stadium_img_url=row['venue_image']
                     )
                     session.add(team_details)
             else:

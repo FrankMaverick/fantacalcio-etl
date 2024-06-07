@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.sources import Source
 from config import DB_PATH
+from utils.helpers import generate_uid
 
 import logging
 logger = logging.getLogger(__name__)
@@ -18,7 +19,11 @@ def insert_source(source_name):
             logger.warning(f"Source '{source_name}' already exists in the source table.")
         else:
             # Inserisci la nuova fonte
-            new_source = Source(source_name=source_name)
+            new_source = Source(
+                    uid=generate_uid(),
+                    source_name=source_name
+                )
+            
             session.add(new_source)
             session.commit()
             logger.info(f"Source '{source_name}' successfully inserted into the source table.")

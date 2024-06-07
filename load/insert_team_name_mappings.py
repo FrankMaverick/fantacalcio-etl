@@ -5,6 +5,7 @@ from models.team import Team
 from models.sources import Source
 from utils.fuzzywuzzy_utils import fuzzy_match_name
 from config import DB_PATH
+from utils.helpers import generate_uid
 
 import logging
 logger = logging.getLogger(__name__)
@@ -44,6 +45,7 @@ def insert_team_name_mappings(team_names_df, source_name):
                 team = session.query(Team).filter_by(team_name=best_match).first()
                 if team:
                     new_mapping = TeamNameMapping(
+                        uid=generate_uid(),
                         team_id=team.id,                        
                         source_id=source_id,
                         team_name=row['team']
@@ -54,6 +56,7 @@ def insert_team_name_mappings(team_names_df, source_name):
             else:
                 logger.warning(f"No suitable match found for '{row['team']}' in the teams table.")
                 new_mapping = TeamNameMapping(
+                    uid=generate_uid(),
                     team_id=None,
                     source_id=source_id,
                     team_name=row['team']

@@ -5,14 +5,10 @@ from sqlalchemy.orm import sessionmaker
 from config import DB_PATH
 from models.base import Base
 from models.team import Team
-from models.team_details import TeamDetails
+from utils.helpers import generate_uid
 
 import logging
 logger = logging.getLogger(__name__)
-
-def generate_uuid():
-    return str(uuid.uuid4())
-
 
 def insert_teams(df_teams, historical_data=False):
     engine = create_engine(DB_PATH)
@@ -27,13 +23,12 @@ def insert_teams(df_teams, historical_data=False):
 
         for _, row in df_teams.iterrows():
             team_data = {
-                'uid': generate_uuid(),
+                'uid': generate_uid(),
                 'footballapi_id': row['team_id'],
                 'team_name': row['team_name'],
                 'team_code': row['team_code'],
                 'team_country': row['team_country'],
                 'team_founded': row['team_founded'],
-                #'team_national': row['team_national'],
                 'team_logo_url': row['team_logo'],
                 'current_in_serie_a': True if not historical_data else None
             }

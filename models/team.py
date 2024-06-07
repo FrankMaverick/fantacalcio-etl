@@ -7,11 +7,10 @@ class Team(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     uid = Column(String, unique=True, nullable=False)
-    team_name = Column(String(255))
+    team_name = Column(String(50))
     team_code = Column(String(10))
-    team_country = Column(String(100))
+    team_country = Column(String(50))
     team_founded = Column(Integer)
-    #team_national = Column(Boolean)
     team_logo_url = Column(String(255))
     current_in_serie_a = Column(Boolean)
     footballapi_id = Column(Integer, unique=True)

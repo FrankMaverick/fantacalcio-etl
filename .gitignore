@@ -164,5 +164,4 @@ cython_debug/
 
 .vscode
 data
-
-.db
+db

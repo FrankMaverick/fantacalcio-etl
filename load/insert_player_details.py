@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from models.player_details import PlayerDetails
 from models.player import Player
 from config import DB_PATH
+from utils.helpers import generate_uid
 
 import logging
 logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ def insert_player_details(player_details_df):
             
             if player:
                 player_details = PlayerDetails(
+                    uid=generate_uid(),
                     player_id=player.id,
                     height=transform_value(row['player_height']),
                     weight=transform_value(row['player_weight']),

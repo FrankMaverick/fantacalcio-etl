@@ -5,12 +5,10 @@ from sqlalchemy.orm import sessionmaker
 from models.player import Player
 from models.team import Team  # Importa il modello Team
 from config import DB_PATH
+from utils.helpers import generate_uid
 
 import logging
 logger = logging.getLogger(__name__)
-
-def generate_uuid():
-    return str(uuid.uuid4())
 
 def insert_players(players_df, historical_data=False):
     engine = create_engine(DB_PATH)
@@ -33,7 +31,7 @@ def insert_players(players_df, historical_data=False):
                 continue
             
             player_data = {
-                'uid': generate_uuid(),
+                'uid': generate_uid(),
                 'display_name': row['player_name'],
                 'first_name': row['player_firstname'],
                 'last_name': row['player_lastname'],

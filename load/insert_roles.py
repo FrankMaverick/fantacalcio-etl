@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from models.role import Role
 from models.player import Player
 from config import DB_PATH
+from utils.helpers import generate_uid
 
 import logging
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ def insert_roles(player_details_df):
                 role = session.query(Role).filter_by(role_principal=role_principal).first()
                 if not role:
                     role = Role(
+                        uid=generate_uid(),
                         role_principal=role_principal,
                         role_specific=None,
                         role_abbreviation=None

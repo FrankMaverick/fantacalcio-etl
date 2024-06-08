@@ -10,12 +10,12 @@ API_KEY = os.getenv('API_KEY')
 
 # Football API Source
 FOOTAPI_LEAGUE = 135
-FOOTAPI_SEASON = 2023
+FOOTAPI_SEASON = 2022
 
 # FBR Source
 FBR_SOURCE_NAME = 'fbr'
 FBR_LEAGUE = 'ITA-Serie A'
-FBR_SEASON = 2023
+FBR_SEASON = 2022
 
 # Json Files
 PLAYERS_FILE_JSON = f"{os.path.join(BASE_DIR, f'data/players_{FOOTAPI_SEASON}.json')}"
@@ -23,4 +23,4 @@ TEAMS_FILE_JSON = f"{os.path.join(BASE_DIR, f'data/teams_{FOOTAPI_SEASON}.json')
 PLAYERS_TEAMS_FILE_JSON = f"{os.path.join(BASE_DIR, f'data/players_teams_{FOOTAPI_SEASON}.json')}"
 
 # data
-HISTORICAL_DATA = False
+HISTORICAL_DATA = True

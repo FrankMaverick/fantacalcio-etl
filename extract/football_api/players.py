@@ -37,7 +37,7 @@ def get_player_info(player_obj):
             # 'games_lineups': stat['games']['lineups'],
             # 'games_minutes': stat['games']['minutes'],
             # 'games_number': stat['games']['number'],
-            # 'games_position': stat['games']['position'],
+            'games_position': stat['games']['position'],
             # 'games_rating': stat['games']['rating'],
             # 'games_captain': stat['games']['captain'],
             # 'substitutes_in': stat['substitutes']['in'],

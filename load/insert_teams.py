@@ -43,6 +43,7 @@ def insert_teams(df_teams, historical_data=False):
                 session.add(new_team)
 
         session.commit()
+        logger.info("Team inserted successfully.")
     except Exception as e:
         session.rollback()
         logger.error(f"Error: {e}")

@@ -17,18 +17,23 @@ def insert_players(players_df, historical_data=False):
 
     try:
         if not historical_data:
-            # Set current_in_serie_a to False and team_id to None for all existing players 
+            # Set current_in_serie_a a False e team_id to None per tutti i players
+            # se non è storico, allora verranno aggiornati 
             session.query(Player).update({Player.current_in_serie_a: False, Player.team_id: None})
             session.commit()
 
         for _, row in players_df.iterrows():
             # Cerca l'ID del team utilizzando il team_id di football_api presente nel DataFrame e nella tabella Teams
-            team = session.query(Team).filter_by(footballapi_id=row['team_id']).first()
-            if team:
-                team_id = team.id
-            else:
-                logger.error(f"Team '{row['team_name']}' not found in the database.")
-                continue
+            # Questa info è disponibile solo per dati attuali, non storici
+            # Per dati storici il team_id non viene settato
+            team_id = None
+            if not historical_data:
+                team = session.query(Team).filter_by(footballapi_id=row['team_id']).first()
+                if team:
+                    team_id = team.id
+                else:
+                    logger.error(f"Team '{row['team_name']}' not found in the database.")
+                    continue
             
             player_data = {
                 'uid': generate_uid(),

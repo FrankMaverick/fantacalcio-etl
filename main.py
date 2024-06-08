@@ -45,7 +45,7 @@ if __name__ == "__main__":
        players_list = file_ops.read_json(PLAYERS_FILE_JSON)
     
     players_df = players_to_dataframe(players_list)
-    #players_df.to_csv('data/players_df.csv')
+    players_df.to_csv('data/players_df.csv')
     
     # Extract Teams
     if not Path(TEAMS_FILE_JSON).is_file():
@@ -80,15 +80,15 @@ if __name__ == "__main__":
     #forse qui non cambia niente se sono dati storici o meno ?
     # team_season_stats_df  = get_team_season_stats(FBR_LEAGUE, FBR_SEASON)
     # team_season_stats_df.reset_index(inplace=True)
-    # team_season_stats_df.to_csv('data/team_season_stats_df.csv')
-    team_season_stats_df = pd.read_csv('data/team_season_stats_df.csv')
+    # team_season_stats_df.to_csv(f'data/team_season_stats_df_{FBR_SEASON}.csv', encoding="utf-8")
+    team_season_stats_df = pd.read_csv(f'data/team_season_stats_df_{FBR_SEASON}.csv')
     fbr_teams = team_season_stats_df[['team']].dropna(axis='rows').copy()
 
     #forse qui non cambia niente se sono dati storici o meno ?
-    #player_season_stats_df  = get_player_season_stats(FBR_LEAGUE, FBR_SEASON)
-    #player_season_stats_df.reset_index(inplace=True)
-    #player_season_stats_df.to_csv('data/player_season_stats_df.csv', encoding="utf-8")
-    player_season_stats_df = pd.read_csv('data/player_season_stats_df.csv')
+    # player_season_stats_df  = get_player_season_stats(FBR_LEAGUE, FBR_SEASON)
+    # player_season_stats_df.reset_index(inplace=True)
+    # player_season_stats_df.to_csv(f'data/player_season_stats_df_{FBR_SEASON}.csv', encoding="utf-8")
+    player_season_stats_df = pd.read_csv(f'data/player_season_stats_df_{FBR_SEASON}.csv')
     fbr_players_teams = player_season_stats_df[['team','player']].dropna(axis='rows').copy()    
 
     # Insert data
@@ -96,15 +96,15 @@ if __name__ == "__main__":
     insert_teams(teams_df, HISTORICAL_DATA)
     insert_team_details(teams_df)
 
-    # # players
+    # players
     insert_players(players_df, HISTORICAL_DATA)
     insert_player_details(players_df)
 
-    # # roles
-    insert_roles(players_df)
+    # roles
+    insert_roles(players_df, HISTORICAL_DATA)
 
-    ## FBREF DATA
-    insert_source(FBR_SOURCE_NAME)
-    # Team mappings from FBRef
-    insert_team_name_mappings(fbr_teams[['team']], FBR_SOURCE_NAME)
-    insert_player_name_mappings(fbr_players_teams[['team','player']], FBR_SOURCE_NAME)
+    # ## FBREF DATA
+    # insert_source(FBR_SOURCE_NAME)
+    # # Team mappings from FBRef
+    # insert_team_name_mappings(fbr_teams[['team']], FBR_SOURCE_NAME)
+    # insert_player_name_mappings(fbr_players_teams[['team','player']], FBR_SOURCE_NAME)

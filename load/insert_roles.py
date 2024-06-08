@@ -22,7 +22,7 @@ def translate_role(role):
     else:
         return None
 
-def insert_roles(player_details_df):
+def insert_roles(player_details_df, HISTORICAL_DATA):
     engine = create_engine(DB_PATH)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -33,7 +33,11 @@ def insert_roles(player_details_df):
             player = session.query(Player).filter_by(footballapi_id=row['player_id']).first()
             
             if player:
-                role_principal = translate_role(row['player_position'])
+                if HISTORICAL_DATA:
+                    role = row['games_position']
+                else:
+                    role = row['player_position']
+                role_principal = translate_role(role)
                 
                 # Controlla se il ruolo esiste già
                 role = session.query(Role).filter_by(role_principal=role_principal).first()

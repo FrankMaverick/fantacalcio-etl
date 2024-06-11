@@ -17,13 +17,7 @@ class TeamDetails(Base):
     team = relationship("Team", back_populates="details")
 
     def __repr__(self):
-        return f"""<TeamDetails(
-            uid={self.uid}, 
-            team_id={self.team_id}, 
-            stadium_name='{self.stadium_name}', 
-            stadium_city='{self.stadium_city}', 
-            stadium_capacity={self.stadium_capacity}, 
-            stadium_img_url='{self.stadium_img_url}')>"""
+        return f"<TeamDetails(uid={self.uid}, team_id={self.team_id}, stadium_name='{self.stadium_name}', stadium_city='{self.stadium_city}', stadium_capacity={self.stadium_capacity}, stadium_img_url='{self.stadium_img_url}')>"
 
     @staticmethod
     def get_team_details_by_id(session, details_id):

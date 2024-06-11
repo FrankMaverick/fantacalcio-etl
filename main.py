@@ -1,9 +1,12 @@
 from config import FOOTAPI_LEAGUE, FOOTAPI_SEASON, FBR_LEAGUE, FBR_SEASON, PLAYERS_FILE_JSON, TEAMS_FILE_JSON, PLAYERS_TEAMS_FILE_JSON, HISTORICAL_DATA, FBR_SOURCE_NAME, DB_PATH
 import logging
 import pandas as pd 
-from scrapers.football_api.players import Players
-from scrapers.football_api.players_teams import PlayersTeams
-from scrapers.football_api.teams import Teams
+from scrapers.fbr.scraper_fbr import ScraperFBR
+from scrapers.football_api.players import Players as FootballAPIPlayers
+from scrapers.football_api.players_teams import PlayersTeams as FootballAPIPlayersTeams
+from scrapers.football_api.teams import Teams as FootballAPITeams
+from scrapers.fbr.teams import Teams as FBRTeams
+from scrapers.fbr.players import Players as FBRPlayers
 from models.database_utils import create_tables, drop_tables
 
 from logging_config import setup_logging
@@ -29,11 +32,11 @@ if __name__ == "__main__":
     logger.info("Start")
 
     # Create tables
-    #drop_tables()
-    #create_tables()
+    drop_tables()
+    create_tables()
 
     # Creare un'istanza di Teams
-    teams = Teams(DB_PATH, HISTORICAL_DATA)
+    teams = FootballAPITeams(DB_PATH, HISTORICAL_DATA)
 
     if not Path(TEAMS_FILE_JSON).is_file():
         # Estrai i dati delle squadre
@@ -49,7 +52,7 @@ if __name__ == "__main__":
     teams.save_data_to_db(transformed_teams)
 
     # Creare un'istanza di Players
-    players = Players(DB_PATH, HISTORICAL_DATA)
+    players = FootballAPIPlayers(DB_PATH, HISTORICAL_DATA)
 
     if not Path(PLAYERS_FILE_JSON).is_file():
         # Estrai i dati dei giocatori
@@ -66,7 +69,7 @@ if __name__ == "__main__":
 
 
     # Creare un'istanza di PlayersTeams
-    players_teams = PlayersTeams(DB_PATH, HISTORICAL_DATA)
+    players_teams = FootballAPIPlayersTeams(DB_PATH, HISTORICAL_DATA)
     if not Path(PLAYERS_TEAMS_FILE_JSON).is_file():
         players_teams_data = players_teams.extract_data()
         save_to_file(players_teams_data, PLAYERS_TEAMS_FILE_JSON)
@@ -80,36 +83,18 @@ if __name__ == "__main__":
     players_teams.save_data_to_db(transformed_players_teams)
 
 
-    
+    ### FBRef
+    scraper_fbr = ScraperFBR(DB_PATH)
+    scraper_fbr.add_source(source_name=FBR_SOURCE_NAME)
+    #Teams
+    teams_fbr = FBRTeams(DB_PATH, FBR_SOURCE_NAME)
+    teams_fbr_data = teams_fbr.extract_data(FBR_LEAGUE, FBR_SEASON)
+    transformed_teams_fbr = teams_fbr.transform_data(teams_fbr_data)
+    teams_fbr.save_data_to_db(transformed_teams_fbr)
+    #Players
+    players_fbr = FBRPlayers(DB_PATH, FBR_SOURCE_NAME)
+    players_fbr_data = players_fbr.extract_data(FBR_LEAGUE, FBR_SEASON)
+    transformed_players_fbr = players_fbr.transform_data(players_fbr_data)
+    print(transformed_players_fbr)
+    players_fbr.save_data_to_db(transformed_players_fbr)
 
-    # #forse qui non cambia niente se sono dati storici o meno ?
-    # # team_season_stats_df  = get_team_season_stats(FBR_LEAGUE, FBR_SEASON)
-    # # team_season_stats_df.reset_index(inplace=True)
-    # # team_season_stats_df.to_csv(f'data/team_season_stats_df_{FBR_SEASON}.csv', encoding="utf-8")
-    # team_season_stats_df = pd.read_csv(f'data/team_season_stats_df_{FBR_SEASON}.csv')
-    # fbr_teams = team_season_stats_df[['team']].dropna(axis='rows').copy()
-
-    # #forse qui non cambia niente se sono dati storici o meno ?
-    # # player_season_stats_df  = get_player_season_stats(FBR_LEAGUE, FBR_SEASON)
-    # # player_season_stats_df.reset_index(inplace=True)
-    # # player_season_stats_df.to_csv(f'data/player_season_stats_df_{FBR_SEASON}.csv', encoding="utf-8")
-    # player_season_stats_df = pd.read_csv(f'data/player_season_stats_df_{FBR_SEASON}.csv')
-    # fbr_players_teams = player_season_stats_df[['team','player']].dropna(axis='rows').copy()    
-
-    # # Insert data
-    # # teams
-    # insert_teams(teams_df, HISTORICAL_DATA)
-    # insert_team_details(teams_df)
-
-    # # players
-    # insert_players(players_df, HISTORICAL_DATA)
-    # insert_player_details(players_df)
-
-    # # roles
-    # insert_roles(players_df, HISTORICAL_DATA)
-
-    # # ## FBREF DATA
-    # # insert_source(FBR_SOURCE_NAME)
-    # # # Team mappings from FBRef
-    # # insert_team_name_mappings(fbr_teams[['team']], FBR_SOURCE_NAME)
-    # # insert_player_name_mappings(fbr_players_teams[['team','player']], FBR_SOURCE_NAME)

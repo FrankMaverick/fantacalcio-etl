@@ -23,7 +23,7 @@ class Player(Base):
     
     team = relationship("Team", back_populates="players")
     player_detail = relationship("PlayerDetails", back_populates="player", uselist=False)
-    #player_name_mappings = relationship("PlayerNameMapping", back_populates="player")
+    player_name_mappings = relationship("PlayerNameMapping", back_populates="player")
     
     def __init__(self, display_name, first_name, last_name, team_id, role_principal, current_in_serie_a, footballapi_id):
         self.display_name = display_name
@@ -35,15 +35,7 @@ class Player(Base):
         self.footballapi_id = footballapi_id
 
     def __repr__(self):
-        return f"""<Player(
-            uid={self.uid}, 
-            display_name='{self.display_name}', 
-            first_name='{self.first_name}', 
-            last_name='{self.last_name}', 
-            team_id={self.team_id}, 
-            role_id={self.role_id}, 
-            current_in_serie_a={self.current_in_serie_a}, 
-            footballapi_id={self.footballapi_id})>"""
+        return f"<Player(uid={self.uid}, display_name='{self.display_name}', first_name='{self.first_name}', last_name='{self.last_name}', team_id={self.team_id}, role_id={self.role_id}, current_in_serie_a={self.current_in_serie_a}, footballapi_id={self.footballapi_id})>"
 
     @staticmethod
     def get_player_by_id(session, player_id):
@@ -59,7 +51,7 @@ class Player(Base):
     
     @staticmethod
     def get_all_players(session):
-        return session.query(Player).all()
+        return session.query(Player).all()     
     
     @staticmethod
     def save_players(session, players_list):

@@ -21,18 +21,10 @@ class Team(Base):
 
     players = relationship("Player", back_populates="team")
     details = relationship("TeamDetails", back_populates="team")
-    #team_name_mappings = relationship("TeamNameMapping", back_populates="team")
+    team_name_mappings = relationship("TeamNameMapping", back_populates="team")
 
     def __repr__(self):
-        return f"""<Team(
-            uid={self.uid}, 
-            team_name='{self.team_name}', 
-            team_code='{self.team_code}', 
-            team_country='{self.team_country}', 
-            team_founded={self.team_founded}, 
-            team_logo_url='{self.team_logo_url}', 
-            current_in_serie_a={self.current_in_serie_a}, 
-            footballapi_id={self.footballapi_id})>"""
+        return f"<Team(uid={self.uid}, team_name='{self.team_name}', team_code='{self.team_code}', team_country='{self.team_country}', team_founded={self.team_founded}, team_logo_url='{self.team_logo_url}', current_in_serie_a={self.current_in_serie_a}, footballapi_id={self.footballapi_id})>"
 
     @staticmethod
     def get_team_by_id(session, team_id):
@@ -41,6 +33,10 @@ class Team(Base):
     @staticmethod
     def get_team_by_footballapi_id(session, footballapi_id):
         return session.query(Team).filter_by(footballapi_id=footballapi_id).first()
+    
+    @staticmethod
+    def get_team_by_name(session, team_name):
+        return session.query(Team).filter_by(team_name=team_name).first()
     
     @staticmethod
     def get_all_teams(session):

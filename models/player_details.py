@@ -29,14 +29,7 @@ class PlayerDetails(Base):
         self.img_url = img_url
 
     def __repr__(self):
-        return f"""<PlayerDetails(
-            uid={self.uid}, 
-            player_id={self.player_id}, 
-            height={self.height}, 
-            weight={self.weight}, 
-            birth_date={self.birth_date}, 
-            nationality='{self.nationality}', 
-            img_url='{self.img_url}')>"""
+        return f"<PlayerDetails(uid={self.uid}, player_id={self.player_id}, height={self.height}, weight={self.weight}, birth_date={self.birth_date}, nationality='{self.nationality}', img_url='{self.img_url}')>"
 
     @staticmethod
     def get_details_by_player_id(session, player_id):

@@ -23,7 +23,6 @@ class Player(Base):
     
     team = relationship("Team", back_populates="players")
     player_detail = relationship("PlayerDetails", back_populates="player", uselist=False)
-    #player_detail = relationship("PlayerDetails", back_populates="player")
     #player_name_mappings = relationship("PlayerNameMapping", back_populates="player")
     
     def __init__(self, display_name, first_name, last_name, team_id, role_principal, current_in_serie_a, footballapi_id):

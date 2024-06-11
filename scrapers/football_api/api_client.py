@@ -1,7 +1,7 @@
 import requests
 from config import API_KEY
-import time
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ def call_api(endpoint, params=None):
     
     try:
         response = requests.get(url, headers=headers, params=params)
-        response.raise_for_status()  # Raise an error for bad status codes
+        response.raise_for_status()
         
         # Stampa gli header di rate limiting
         rate_limit_headers = {
@@ -43,7 +43,7 @@ def fetch_players_data(league, season, page=1, players_data=[]):
     if players['paging']['current'] < players['paging']['total']:
         logger.debug(f"Page {players['paging']['current']} of {players['paging']['total']}")
         page += 1
-        time.sleep(6.1)  # Pausa di 6 secondo per evitare di superare il rate limit (10 req / min)
+        time.sleep(6.1)  # Pausa di 6 sec per evitare di superare il rate limit (10 req / min)
         return fetch_players_data(league, season, page, players_data)
     
     return players_data
@@ -61,13 +61,13 @@ def fetch_teams_data(league, season):
     return teams_data
 
 # funzione per estrarre i player di un team
-def fetch_players_teams_data(teams):
+def fetch_players_teams_data(team_ids):
     players_teams_data = []
-    for team in teams:
-        logger.debug(f"Extracting players of {team['team']['name']}")
-        players_team_data = fetch_players_team_data(team['team']['id'])
+    for team_id in team_ids:
+        logger.debug(f"Extracting players of team: {team_id}")
+        players_team_data = fetch_players_team_data(team_id)
         players_teams_data.extend(players_team_data)
-        time.sleep(6.1)
+        time.sleep(6.1)  # Pausa di 6 sec per evitare di superare il rate limit (10 req / min)
     return players_teams_data
     
 

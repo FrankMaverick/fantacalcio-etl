@@ -20,3 +20,19 @@ def read_json(file_path):
     logger.info(f"Loaded {len(content)} elements from {file_path}")
     return content
 
+
+def save_to_file(data, file_path):
+    """
+    Salva i dati su un file JSON.
+    """
+    with open(file_path, 'w', encoding="utf-8") as file:
+        json.dump(data, file)
+    logger.info(f"Created {file_path}")
+
+def load_from_file(file_path):
+    """
+    Carica i dati da un file JSON.
+    """
+    with open(file_path, 'r', encoding="utf-8") as file:
+        data = json.load(file)
+    return data

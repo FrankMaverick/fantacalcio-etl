@@ -20,8 +20,8 @@ if __name__ == "__main__":
     logger.info("Start")
 
     # Create tables
-    drop_tables()
-    create_tables()
+    #drop_tables()
+    #create_tables()
 
     # Creare un'istanza di Teams
     teams = FootballAPITeams(DB_PATH, league=FOOTAPI_LEAGUE, season=FOOTAPI_SEASON, historical_data=HISTORICAL_DATA)
@@ -75,14 +75,14 @@ if __name__ == "__main__":
     scraper_fbr = ScraperFBR(DB_PATH)
     scraper_fbr.add_source(source_name=FBR_SOURCE_NAME)
     #Teams
-    teams_fbr = FBRTeams(DB_PATH, FBR_SOURCE_NAME)
-    teams_fbr_data = teams_fbr.extract_data(FBR_LEAGUE, FBR_SEASON)
+    teams_fbr = FBRTeams(DB_PATH, FBR_SOURCE_NAME, FBR_LEAGUE, FBR_SEASON, HISTORICAL_DATA)
+    teams_fbr_data = teams_fbr.extract_data()
     transformed_teams_fbr = teams_fbr.transform_data(teams_fbr_data)
     teams_fbr.save_data_to_db(transformed_teams_fbr)
     #Players
-    players_fbr = FBRPlayers(DB_PATH, FBR_SOURCE_NAME)
-    players_fbr_data = players_fbr.extract_data(FBR_LEAGUE, FBR_SEASON)
+    players_fbr = FBRPlayers(DB_PATH, FBR_SOURCE_NAME, FBR_LEAGUE, FBR_SEASON, HISTORICAL_DATA)
+    players_fbr_data = players_fbr.extract_data()
     transformed_players_fbr = players_fbr.transform_data(players_fbr_data)
-    print(transformed_players_fbr)
+    #print(transformed_players_fbr)
     players_fbr.save_data_to_db(transformed_players_fbr)
 

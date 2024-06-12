@@ -13,17 +13,21 @@ from utils.fuzzywuzzy_utils import fuzzy_match_name
 logger = logging.getLogger(__name__)
 
 class Players:
-    def __init__(self, db_path, source_name):
+    def __init__(self, db_path, source_name, league, season, historical_data=False):
         self.db_engine = create_engine(db_path)
         self.Session = sessionmaker(bind=self.db_engine)
         self.source_name = source_name
+        self.league = league
+        self.season = season        
+        self.historical_data = historical_data
+        self.fbr = sd.FBref(leagues=league, seasons=season)
 
-    def extract_data(self, league, season):
+
+    def extract_data(self):
         """
-        Estrae i dati dei giocatori per una determinata lega e stagione.
+        Estrae i dati dei giocatori.
         """
-        fbr = sd.FBref(leagues=league, seasons=season)
-        return fbr.read_player_season_stats(stat_type="standard")
+        return self.fbr.read_player_season_stats(stat_type="standard")
 
     def transform_data(self, players_df):
         """
@@ -55,33 +59,37 @@ class Players:
                 player_name = item["player"]
                 team_name = item["team"]
 
-                print(player_name)
-                print(team_name)
-
                 # Verifica se il nome del giocatore è già presente nella tabella di mapping
                 existing_mapping = PlayerNameMapping.get_mapping_by_player_and_source(Session, player_name, source_id)
 
-                if existing_mapping:
+                if existing_mapping and existing_mapping.player_id:
                     logger.warning(f"Player '{player_name}' already exists in the player_name_mappings table for source '{self.source_name}'.")
                     continue
                 
-                # Ottieni il team_id corrispondente al team_name nella tabella team_name_mappings per la stessa source
-                team_mapping = TeamNameMapping.get_mapping_by_team_and_source(Session, team_name, source_id)
-                if not team_mapping:
-                    logger.warning(f"No team mapping found for team '{team_name}' and source '{self.source_name}'. Skipping player '{player_name}'.")
-                    continue
+                # Se sono dati non storici, fare un match considerando anche la squadra (in questo modo è più preciso)
+                if not self.historical_data:
+                    # Ottieni il team_id corrispondente al team_name nella tabella team_name_mappings per la stessa source
+                    team_mapping = TeamNameMapping.get_mapping_by_team_and_source(Session, team_name, source_id)
+                    if not team_mapping:
+                        logger.warning(f"No team mapping found for team '{team_name}' and source '{self.source_name}'. Skipping player '{player_name}'.")
+                        continue
 
-                team_id = team_mapping.team_id
+                    team_id = team_mapping.team_id
 
-                # Ottieni tutti i giocatori del team specificato
-                players = Player.get_players_by_team_id(Session, team_id)
+                    # Ottieni tutti i giocatori del team specificato
+                    players = Player.get_players_by_team_id(Session, team_id)
+                
+                # Per dati storici non si ha info sulla squadra, allora si fa il match considerando tutti i giocatori    
+                else:
+                    players = Player.get_all_players(Session)
+                
                 all_player_names = [self._get_full_name(player.display_name, player.first_name) for player in players]
 
                 # Cerca il miglior match fuzzywuzzy tra i nomi dei giocatori del team specificato
                 best_match, score = fuzzy_match_name(player_name, all_player_names)
                 logger.debug(f"Best match for '{player_name}' is '{best_match}' with score {score}")
 
-                if score >= 85:
+                if score >= 87:
                     matched_player = next((p for p in players if self._get_full_name(p.display_name, p.first_name) == best_match), None)
                     if matched_player:
                         if existing_mapping:

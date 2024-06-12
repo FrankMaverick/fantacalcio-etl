@@ -34,9 +34,15 @@ class Source(Base):
     @staticmethod
     def save_source(session, source_name):
         try:
-            new_source = Source(
-                source_name=source_name
-            )
+            # Verifica se la sorgente esiste già
+            existing_source = Source.get_source_by_name(session, source_name)
+            if existing_source:
+                logger.info(f"Source '{source_name}' already exists.")
+                return existing_source
+
+            # Crea una nuova sorgente se non esiste            
+            new_source = Source(source_name=source_name)
+            
             session.add(new_source)
             session.commit()
             logger.info(f"Source {source_name} saved successfully.")

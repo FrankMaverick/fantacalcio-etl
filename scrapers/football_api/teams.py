@@ -8,16 +8,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Teams:
-    def __init__(self, db_path, historical_data=False):
+    def __init__(self, db_path, league, season, historical_data=False):
         self.db_engine = create_engine(db_path)
         self.Session = sessionmaker(bind=self.db_engine)
         self.historical_data = historical_data
+        self.league = league
+        self.season = season        
 
-    def extract_data(self, league, season):
+    def extract_data(self):
         """
         Estrae i dati delle squadre dalla sorgente API.
         """
-        return fetch_teams_data(league, season)
+        return fetch_teams_data(self.league, self.season)
     
     def map_data_to_dict(self, team_obj):
         """

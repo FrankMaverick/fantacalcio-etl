@@ -11,17 +11,20 @@ from utils.fuzzywuzzy_utils import fuzzy_match_name
 logger = logging.getLogger(__name__)
 
 class Teams:
-    def __init__(self, db_path, source_name):
+    def __init__(self, db_path, source_name, league, season, historical_data=False):
         self.db_engine = create_engine(db_path)
         self.Session = sessionmaker(bind=self.db_engine)
         self.source_name = source_name
+        self.league = league
+        self.season = season
+        self.historical_data = historical_data
+        self.fbr = sd.FBref(leagues=league, seasons=season)
 
-    def extract_data(self, league, season):
+    def extract_data(self):
         """
-        Estrae i dati delle squadre per una determinata lega e stagione.
+        Estrae i dati delle squadre per league e season
         """
-        fbr = sd.FBref(leagues=league, seasons=season)
-        return fbr.read_team_season_stats(stat_type="standard")
+        return self.fbr.read_team_season_stats(stat_type="standard")
 
     def transform_data(self, teams_df):
         """

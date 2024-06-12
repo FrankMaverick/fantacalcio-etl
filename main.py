@@ -8,22 +8,10 @@ from scrapers.football_api.teams import Teams as FootballAPITeams
 from scrapers.fbr.teams import Teams as FBRTeams
 from scrapers.fbr.players import Players as FBRPlayers
 from models.database_utils import create_tables, drop_tables
-
-from logging_config import setup_logging
-from pathlib import Path
-
 from utils.file_operations import load_from_file, save_to_file
+from pathlib import Path
+from logging_config import setup_logging
 
-# from load.insert_player_name_mappings import insert_player_name_mappings
-# from load.insert_sources import insert_source
-# from load.insert_team_name_mappings import insert_team_name_mappings
-# from load.truncate_tables import truncate_tables
-# from scrapers.fbr.team_season_stats import get_team_season_stats
-# from scrapers.fbr.player_season_stats import get_player_season_stats
-# from load.insert_player_details import insert_player_details
-# from load.insert_players import insert_players
-
-# Imposta il logging
 setup_logging()
 
 logger = logging.getLogger(__name__)
@@ -32,15 +20,15 @@ if __name__ == "__main__":
     logger.info("Start")
 
     # Create tables
-    drop_tables()
-    create_tables()
+    #drop_tables()
+    #create_tables()
 
     # Creare un'istanza di Teams
-    teams = FootballAPITeams(DB_PATH, HISTORICAL_DATA)
+    teams = FootballAPITeams(DB_PATH, league=FOOTAPI_LEAGUE, season=FOOTAPI_SEASON, historical_data=HISTORICAL_DATA)
 
     if not Path(TEAMS_FILE_JSON).is_file():
         # Estrai i dati delle squadre
-        teams_data = teams.extract_data(league=FOOTAPI_LEAGUE, season=FOOTAPI_SEASON)
+        teams_data = teams.extract_data()
         save_to_file(teams_data, TEAMS_FILE_JSON)
 
     teams_data = load_from_file(TEAMS_FILE_JSON)
@@ -52,11 +40,11 @@ if __name__ == "__main__":
     teams.save_data_to_db(transformed_teams)
 
     # Creare un'istanza di Players
-    players = FootballAPIPlayers(DB_PATH, HISTORICAL_DATA)
+    players = FootballAPIPlayers(DB_PATH, league=FOOTAPI_LEAGUE, season=FOOTAPI_SEASON, historical_data=HISTORICAL_DATA)
 
     if not Path(PLAYERS_FILE_JSON).is_file():
         # Estrai i dati dei giocatori
-        players_data = players.extract_data(league=FOOTAPI_LEAGUE, season=FOOTAPI_SEASON)
+        players_data = players.extract_data()
         save_to_file(players_data, PLAYERS_FILE_JSON)
 
     players_data = load_from_file(PLAYERS_FILE_JSON)
@@ -87,14 +75,14 @@ if __name__ == "__main__":
     scraper_fbr = ScraperFBR(DB_PATH)
     scraper_fbr.add_source(source_name=FBR_SOURCE_NAME)
     #Teams
-    teams_fbr = FBRTeams(DB_PATH, FBR_SOURCE_NAME)
-    teams_fbr_data = teams_fbr.extract_data(FBR_LEAGUE, FBR_SEASON)
+    teams_fbr = FBRTeams(DB_PATH, FBR_SOURCE_NAME, FBR_LEAGUE, FBR_SEASON, HISTORICAL_DATA)
+    teams_fbr_data = teams_fbr.extract_data()
     transformed_teams_fbr = teams_fbr.transform_data(teams_fbr_data)
     teams_fbr.save_data_to_db(transformed_teams_fbr)
     #Players
-    players_fbr = FBRPlayers(DB_PATH, FBR_SOURCE_NAME)
-    players_fbr_data = players_fbr.extract_data(FBR_LEAGUE, FBR_SEASON)
+    players_fbr = FBRPlayers(DB_PATH, FBR_SOURCE_NAME, FBR_LEAGUE, FBR_SEASON, HISTORICAL_DATA)
+    players_fbr_data = players_fbr.extract_data()
     transformed_players_fbr = players_fbr.transform_data(players_fbr_data)
-    print(transformed_players_fbr)
+    #print(transformed_players_fbr)
     players_fbr.save_data_to_db(transformed_players_fbr)
 

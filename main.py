@@ -20,24 +20,24 @@ if __name__ == "__main__":
     logger.info("Start")
 
     # Create tables
-    #drop_tables()
-    #create_tables()
+    drop_tables()
+    create_tables()
 
     # Creare un'istanza di Teams
     teams = FootballAPITeams(DB_PATH, league=FOOTAPI_LEAGUE, season=FOOTAPI_SEASON, historical_data=HISTORICAL_DATA)
 
     if not Path(TEAMS_FILE_JSON).is_file():
         # Estrai i dati delle squadre
-        teams_data = teams.extract_data()
-        save_to_file(teams_data, TEAMS_FILE_JSON)
+        teams.extract()
+        save_to_file(teams._extracted_data, TEAMS_FILE_JSON)
 
-    teams_data = load_from_file(TEAMS_FILE_JSON)
+    teams._extracted_data = load_from_file(TEAMS_FILE_JSON)
 
     # Trasforma i dati delle squadre
-    transformed_teams = teams.transform_data(teams_data)
+    teams.transform()
 
     # Salva i dati delle squadre nel database
-    teams.save_data_to_db(transformed_teams)
+    teams.load()
 
     # Creare un'istanza di Players
     players = FootballAPIPlayers(DB_PATH, league=FOOTAPI_LEAGUE, season=FOOTAPI_SEASON, historical_data=HISTORICAL_DATA)

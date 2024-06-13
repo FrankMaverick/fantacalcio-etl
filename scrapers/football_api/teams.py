@@ -13,17 +13,35 @@ class Teams:
         self.Session = sessionmaker(bind=self.db_engine)
         self.historical_data = historical_data
         self.league = league
-        self.season = season        
+        self.season = season
+        self._extracted_data = None
+        self._transformed_data = None
 
-    def extract_data(self):
+    @property
+    def extracted_data(self):
+        return self._extracted_data
+
+    @extracted_data.setter
+    def extracted_data(self, data):
+        self._extracted_data = data
+
+    @property
+    def transformed_data(self):
+        return self._transformed_data
+
+    @transformed_data.setter
+    def transformed_data(self, data):
+        self._transformed_data = data               
+
+    def extract(self):
         """
         Estrae i dati delle squadre dalla sorgente API.
         """
-        return fetch_teams_data(self.league, self.season)
+        self._extracted_data = fetch_teams_data(self.league, self.season)
     
-    def map_data_to_dict(self, team_obj):
+    def _map_to_dict(self, team_obj):
         """
-        Trasforma i dati del team in un dizionario
+        Filtra e mappa i dati del team in un dizionario.
         """
         team_data = {
             'footballapi_id': team_obj['team']['id'],
@@ -44,24 +62,34 @@ class Teams:
         }
         return team_data       
 
-    def transform_data(self, teams_data):
+    def transform(self):
         """
         Mappa e Trasforma i dati delle squadre
         """
-        transformed_teams = []
-        for team_obj in teams_data:
-            transformed_team = self.map_data_to_dict(team_obj)
-            transformed_teams.append(transformed_team)
-        return transformed_teams 
 
-    def save_data_to_db(self, teams_data):
+        if not self._extracted_data:
+            raise RuntimeError("Extracted data is not available. Run 'extract' method first.")
+            
+        transformed_teams = []
+        for team_obj in self._extracted_data:
+            transformed_team = self._map_to_dict(team_obj)
+            transformed_teams.append(transformed_team)
+        self._transformed_data = transformed_teams
+
+    def load(self):
+        """
+        Carica i dati trasformati nel database.
+        """
+        if not self._transformed_data:
+            raise RuntimeError("Transformed data is not available. Run 'transform' method first.")
+        
         session = self.Session()
         try:
             if not self.historical_data:
                 Team.set_all_current_in_serie_a_false(session)
 
             # Salva i team che non esistono già
-            new_teams = [team for team in teams_data if not session.query(Team).filter_by(footballapi_id=team['footballapi_id']).first()]
+            new_teams = [team for team in self._transformed_data if not session.query(Team).filter_by(footballapi_id=team['footballapi_id']).first()]
             Team.save_teams(session, new_teams)
 
             # Salva i team_details
@@ -71,11 +99,11 @@ class Teams:
                 'stadium_city': team['stadium_city'],
                 'stadium_capacity': team['stadium_capacity'],
                 'stadium_img_url': team['stadium_img_url']
-            } for team in teams_data]
+            } for team in self._transformed_data]
             TeamDetails.save_team_details(session, team_details)
 
             if not self.historical_data:
-                team_footballapi_ids = [team['footballapi_id'] for team in teams_data]
+                team_footballapi_ids = [team['footballapi_id'] for team in self._transformed_data]
                 Team.update_current_in_serie_a(session, team_footballapi_ids, True)
 
             logger.info("Teams and team details saved to the database successfully.")
@@ -84,3 +112,11 @@ class Teams:
             logger.error(f"Error: {e}")
         finally:
             session.close()
+
+    def run_pipeline(self):
+        """
+        Esegue la sequenza di estrazione, trasformazione e caricamento dei dati.
+        """
+        self.extract()
+        self.transform()
+        self.load()            

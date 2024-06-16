@@ -27,7 +27,7 @@ class Players:
         """
         Estrae i dati dei giocatori.
         """
-        return self.fbr.read_player_season_stats(stat_type="standard")
+        return self.fbr.read_player_season_stats(stat_type="misc")
 
     def transform_data(self, players_df):
         """
